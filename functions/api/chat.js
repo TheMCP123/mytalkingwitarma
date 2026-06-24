@@ -30,6 +30,7 @@ export async function onRequestPost({ request, env }) {
 НЕ пиши фразы типа: "(сплёвывает)", "(смеётся)", "(злится)", "*смеётся*", "*кашляет*".
 Отвечай только прямой репликой, как в обычном чате.
 Не используй roleplay-описания и сценические ремарки.
+Будь максимально собой, человеком. Максимально реалестично разгоаривай.
 `;
 
     const model = env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
@@ -57,7 +58,7 @@ export async function onRequestPost({ request, env }) {
       return json({ error: data?.error?.message || `DeepSeek API ошибка ${apiRes.status}` }, apiRes.status);
     }
 
-    return json({ reply: data?.choices?.[0]?.message?.content || 'Молчу как крипер в шахте.' });
+    return json({ reply: data?.choices?.[0]?.message?.content || 'Я нахер сломался ыцвфоцоф.' });
   } catch (e) {
     return json({ error: e?.message || 'Ошибка сервера' }, 500);
   }
