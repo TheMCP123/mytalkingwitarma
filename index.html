@@ -7,17 +7,24 @@
 
   <style>
     * { box-sizing: border-box; }
-    :root { color-scheme: dark; }
+    :root {
+      color-scheme: dark;
+      --bg: #080a10;
+      --accent-1: #4f8cff;
+      --accent-2: #8f5cff;
+      --panel: #0c0f18;
+      --text: #f5f7fb;
+    }
 
     body {
       margin: 0;
       min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       background:
-        radial-gradient(circle at 20% 0%, rgba(91, 141, 255, .24), transparent 34%),
-        radial-gradient(circle at 90% 20%, rgba(160, 89, 255, .18), transparent 28%),
-        #080a10;
-      color: #f5f7fb;
+        radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--accent-1) 24%, transparent), transparent 34%),
+        radial-gradient(circle at 90% 20%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 28%),
+        var(--bg);
+      color: var(--text);
       display: grid;
       place-items: center;
       padding: 18px;
@@ -28,7 +35,7 @@
       height: min(760px, calc(100vh - 36px));
       border: 1px solid rgba(255,255,255,.12);
       border-radius: 28px;
-      background: rgba(12, 15, 24, .76);
+      background: color-mix(in srgb, var(--panel) 76%, transparent);
       box-shadow: 0 24px 70px rgba(0,0,0,.5);
       backdrop-filter: blur(18px);
       overflow: hidden;
@@ -54,7 +61,7 @@
       image-rendering: pixelated;
       background: #fff;
       border: 1px solid rgba(255,255,255,.16);
-      box-shadow: 0 10px 28px rgba(91, 141, 255, .24);
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-1) 24%, transparent);
       flex-shrink: 0;
     }
 
@@ -104,7 +111,7 @@
 
     .user {
       align-self: flex-end;
-      background: linear-gradient(135deg, #4f8cff, #8f5cff);
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
       border-bottom-right-radius: 6px;
     }
 
@@ -158,8 +165,8 @@
       height: 50px;
       border: 0;
       border-radius: 16px;
-      background: #f5f7fb;
-      color: #111522;
+      background: var(--text);
+      color: var(--panel);
       font-size: 20px;
       font-weight: 900;
       cursor: pointer;
@@ -175,9 +182,69 @@
 
     button:disabled { opacity: .55; cursor: not-allowed; }
 
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.09);
+      color: white;
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 17px;
+    }
+
+    .customizer {
+      display: none;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.035);
+    }
+
+    .customizer.open {
+      display: grid;
+    }
+
+    .color-item {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(255,255,255,.68);
+    }
+
+    .color-item input {
+      width: 100%;
+      height: 34px;
+      padding: 0;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 10px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .reset-colors {
+      width: 100%;
+      height: 34px;
+      border-radius: 10px;
+      font-size: 12px;
+      background: rgba(255,255,255,.09);
+      color: white;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
     @media (max-width: 560px) {
       body { padding: 0; }
       .app { height: 100vh; border-radius: 0; width: 100%; border: 0; }
+      .customizer { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
@@ -187,7 +254,20 @@
     <header>
       <img class="avatar" alt="Витёк Арматура" src="assets/vitek-avatar.png" />
       <h1>Витёк Арматура</h1>
+      <div class="header-actions">
+        <button id="downloadChat" class="icon-btn" type="button" title="Скачать диалог">⬇</button>
+        <button id="customizeToggle" class="icon-btn" type="button" title="Настроить цвета">🎨</button>
+      </div>
     </header>
+
+    <section id="customizer" class="customizer">
+      <label class="color-item">Фон<input id="bgColor" type="color" value="#080a10"></label>
+      <label class="color-item">Кнопки 1<input id="accent1Color" type="color" value="#4f8cff"></label>
+      <label class="color-item">Кнопки 2<input id="accent2Color" type="color" value="#8f5cff"></label>
+      <label class="color-item">Панель<input id="panelColor" type="color" value="#0c0f18"></label>
+      <label class="color-item">Текст<input id="textColor" type="color" value="#f5f7fb"></label>
+      <button id="resetColors" class="reset-colors" type="button">Сброс</button>
+    </section>
 
     <section class="messages" id="messages"></section>
 
@@ -212,14 +292,72 @@
     const fileButton = document.getElementById('fileButton');
     const fileInput = document.getElementById('fileInput');
     const fileChip = document.getElementById('fileChip');
+    const downloadChat = document.getElementById('downloadChat');
+    const customizeToggle = document.getElementById('customizeToggle');
+    const customizer = document.getElementById('customizer');
+    const resetColors = document.getElementById('resetColors');
+
+    const colorInputs = {
+      bg: document.getElementById('bgColor'),
+      accent1: document.getElementById('accent1Color'),
+      accent2: document.getElementById('accent2Color'),
+      panel: document.getElementById('panelColor'),
+      text: document.getElementById('textColor')
+    };
 
     const history = [];
+    const dialogLog = [];
     const MAX_FILE_SIZE = 50 * 1024;
     const ALLOWED_EXTENSIONS = ['txt', 'json', 'yml', 'yaml', 'log', 'html'];
 
     let selectedVoice = null;
     let voiceReady = false;
     let attachedFile = null;
+
+    const defaultColors = {
+      bg: '#080a10',
+      accent1: '#4f8cff',
+      accent2: '#8f5cff',
+      panel: '#0c0f18',
+      text: '#f5f7fb'
+    };
+
+    function applyColors(colors) {
+      const c = { ...defaultColors, ...colors };
+      document.documentElement.style.setProperty('--bg', c.bg);
+      document.documentElement.style.setProperty('--accent-1', c.accent1);
+      document.documentElement.style.setProperty('--accent-2', c.accent2);
+      document.documentElement.style.setProperty('--panel', c.panel);
+      document.documentElement.style.setProperty('--text', c.text);
+
+      colorInputs.bg.value = c.bg;
+      colorInputs.accent1.value = c.accent1;
+      colorInputs.accent2.value = c.accent2;
+      colorInputs.panel.value = c.panel;
+      colorInputs.text.value = c.text;
+    }
+
+    function saveColors() {
+      const colors = {
+        bg: colorInputs.bg.value,
+        accent1: colorInputs.accent1.value,
+        accent2: colorInputs.accent2.value,
+        panel: colorInputs.panel.value,
+        text: colorInputs.text.value
+      };
+
+      localStorage.setItem('vitekColors', JSON.stringify(colors));
+      applyColors(colors);
+    }
+
+    function loadColors() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('vitekColors') || 'null');
+        applyColors(saved || defaultColors);
+      } catch {
+        applyColors(defaultColors);
+      }
+    }
 
     function getTime() {
       return new Date().toLocaleTimeString('ru-RU', {
@@ -228,13 +366,18 @@
       });
     }
 
-    function addBubble(text, type) {
+    function addBubble(text, type, saveToDialog = true) {
       const el = document.createElement('div');
       el.className = 'bubble ' + type;
       el.dataset.time = getTime();
       el.textContent = text;
       messagesEl.appendChild(el);
       messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      if (saveToDialog) {
+        dialogLog.push({ role: type === 'user' ? 'user' : 'bot', text });
+      }
+
       return el;
     }
 
@@ -242,6 +385,33 @@
       el.textContent = text;
       el.dataset.time = getTime();
       messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function addToDialog(role, text) {
+      dialogLog.push({ role, text });
+    }
+
+    function downloadDialog() {
+      if (!dialogLog.length) {
+        addBubble('Скачивать нечего, диалога нет.', 'bot');
+        return;
+      }
+
+      const content = dialogLog
+        .map(item => `${item.role === 'bot' ? 'ВИТЁК' : 'ТЫ'}: ${item.text}`)
+        .join('
+
+');
+
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vitek-dialog-${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
 
     function formatBytes(bytes) {
@@ -341,6 +511,23 @@
       speechSynthesis.onvoiceschanged = loadVoice;
     }
 
+    loadColors();
+
+    Object.values(colorInputs).forEach(input => {
+      input.addEventListener('input', saveColors);
+    });
+
+    customizeToggle.addEventListener('click', () => {
+      customizer.classList.toggle('open');
+    });
+
+    resetColors.addEventListener('click', () => {
+      localStorage.removeItem('vitekColors');
+      applyColors(defaultColors);
+    });
+
+    downloadChat.addEventListener('click', downloadDialog);
+
     fileButton.addEventListener('click', () => fileInput.click());
 
     fileChip.addEventListener('click', () => {
@@ -417,7 +604,7 @@
 
       clearAttachedFile();
 
-      const wait = addBubble('Витёк печатает...', 'bot');
+      const wait = addBubble('Витёк печатает...', 'bot', false);
 
       try {
         const res = await fetch('/api/chat', {
@@ -438,6 +625,7 @@
 
         const reply = cleanReply(data.reply || 'Не придумал что сказать.');
         setBubbleText(wait, reply);
+        addToDialog('bot', reply);
 
         history.push({
           role: 'assistant',
@@ -447,6 +635,7 @@
         speakVitek(reply);
       } catch (err) {
         setBubbleText(wait, 'Ошибка: ' + err.message);
+        addToDialog('bot', 'Ошибка: ' + err.message);
       } finally {
         send.disabled = false;
         fileButton.disabled = false;
