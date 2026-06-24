@@ -48,7 +48,7 @@ export async function onRequestPost({ request, env }) {
           ...cleanMessages
         ],
         temperature: 0.85,
-        max_tokens: 300
+        max_tokens: 500
       })
     });
 
