@@ -8,3 +8,4 @@
 - `DEEPSEEK_MODEL` — опционально, например `deepseek-v4-flash`.
 
 После добавления переменных сделай Redeploy.
+1
