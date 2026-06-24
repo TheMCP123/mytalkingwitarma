@@ -4,55 +4,56 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Витёк Арматура</title>
-
   <style>
     * { box-sizing: border-box; }
     :root {
       color-scheme: dark;
-      --bg: #080a10;
-      --accent-1: #4f8cff;
-      --accent-2: #8f5cff;
-      --panel: #0c0f18;
+      --bg1: #080a10;
+      --bg2: #111522;
+      --panel: rgba(12, 15, 24, .78);
+      --panel2: rgba(255,255,255,.04);
       --text: #f5f7fb;
+      --muted: rgba(245,247,251,.62);
+      --accent1: #4f8cff;
+      --accent2: #8f5cff;
+      --bot: rgba(255,255,255,.09);
+      --border: rgba(255,255,255,.12);
     }
-
     body {
       margin: 0;
       min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       background:
-        radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--accent-1) 24%, transparent), transparent 34%),
-        radial-gradient(circle at 90% 20%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 28%),
-        var(--bg);
+        radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--accent1) 28%, transparent), transparent 34%),
+        radial-gradient(circle at 90% 20%, color-mix(in srgb, var(--accent2) 22%, transparent), transparent 28%),
+        var(--bg1);
       color: var(--text);
       display: grid;
       place-items: center;
       padding: 18px;
     }
-
     .app {
       width: min(100%, 520px);
       height: min(760px, calc(100vh - 36px));
-      border: 1px solid rgba(255,255,255,.12);
+      border: 1px solid var(--border);
       border-radius: 28px;
-      background: color-mix(in srgb, var(--panel) 76%, transparent);
+      background: var(--panel);
       box-shadow: 0 24px 70px rgba(0,0,0,.5);
       backdrop-filter: blur(18px);
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
-
     header {
       height: 82px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       padding: 16px 18px;
       border-bottom: 1px solid rgba(255,255,255,.09);
-      background: rgba(255,255,255,.035);
+      background: var(--panel2);
+      flex-shrink: 0;
     }
-
     .avatar {
       width: 52px;
       height: 52px;
@@ -61,19 +62,29 @@
       image-rendering: pixelated;
       background: #fff;
       border: 1px solid rgba(255,255,255,.16);
-      box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-1) 24%, transparent);
+      box-shadow: 0 10px 28px rgba(91, 141, 255, .24);
       flex-shrink: 0;
     }
-
-    h1 {
-      margin: 0;
-      font-size: 22px;
-      letter-spacing: -.03em;
-      font-weight: 800;
+    h1 { margin: 0; font-size: 22px; letter-spacing: -.03em; font-weight: 800; }
+    .head-actions { margin-left: auto; display: flex; gap: 8px; }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 17px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      flex-shrink: 0;
     }
-
+    .icon-btn:hover { background: rgba(255,255,255,.13); }
     .messages {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
       padding: 18px;
       display: flex;
@@ -81,362 +92,202 @@
       gap: 10px;
       scroll-behavior: smooth;
     }
-
+    .msg-wrap { display: flex; flex-direction: column; gap: 4px; max-width: 86%; }
+    .msg-wrap.bot-wrap { align-self: flex-start; }
+    .msg-wrap.user-wrap { align-self: flex-end; align-items: flex-end; }
     .bubble {
-      max-width: 86%;
-      padding: 12px 14px 8px;
+      padding: 12px 14px;
       border-radius: 18px;
       white-space: pre-wrap;
       line-height: 1.38;
       font-size: 15px;
       overflow-wrap: anywhere;
-      position: relative;
     }
-
-    .bubble::after {
-      content: attr(data-time);
-      display: block;
-      margin-top: 5px;
-      font-size: 11px;
-      line-height: 1;
-      opacity: .55;
-      white-space: nowrap;
+    .bot { background: var(--bot); border-bottom-left-radius: 6px; }
+    .user { background: linear-gradient(135deg, var(--accent1), var(--accent2)); border-bottom-right-radius: 6px; }
+    .time { font-size: 11px; color: var(--muted); padding: 0 6px; user-select: none; }
+    .file-pill {
+      display: none;
+      margin: 0 14px 8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.11);
+      background: rgba(255,255,255,.06);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      align-items: center;
+      gap: 8px;
     }
-
-    .bot {
-      align-self: flex-start;
-      background: rgba(255,255,255,.09);
-      border-bottom-left-radius: 6px;
+    .file-pill.show { display: flex; }
+    .file-pill button {
+      width: auto;
+      height: auto;
+      padding: 2px 7px;
+      border-radius: 9px;
+      font-size: 13px;
+      margin-left: auto;
     }
-
-    .user {
-      align-self: flex-end;
-      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-      border-bottom-right-radius: 6px;
-    }
-
     form {
       display: flex;
       gap: 10px;
       padding: 14px;
       border-top: 1px solid rgba(255,255,255,.09);
-      background: rgba(255,255,255,.035);
-      align-items: flex-end;
+      background: var(--panel2);
+      flex-shrink: 0;
     }
-
-    .input-wrap {
+    input[type="text"] {
       flex: 1;
       min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .file-chip {
-      width: fit-content;
-      max-width: 100%;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-      color: rgba(255,255,255,.82);
-      font-size: 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    input[type="text"] {
-      width: 100%;
       border: 1px solid rgba(255,255,255,.13);
       background: rgba(0,0,0,.28);
-      color: #fff;
+      color: var(--text);
       border-radius: 16px;
       padding: 14px 15px;
       outline: none;
       font: inherit;
     }
-
-    input[type="text"]:focus { border-color: rgba(120,160,255,.75); }
-
-    button {
+    input[type="text"]:focus { border-color: color-mix(in srgb, var(--accent1) 75%, white); }
+    .send-btn {
       width: 50px;
-      height: 50px;
       border: 0;
       border-radius: 16px;
       background: var(--text);
-      color: var(--panel);
+      color: #111522;
       font-size: 20px;
       font-weight: 900;
       cursor: pointer;
       flex-shrink: 0;
     }
-
-    .file-btn {
-      background: rgba(255,255,255,.09);
-      color: white;
-      border: 1px solid rgba(255,255,255,.12);
-      font-size: 18px;
-    }
-
     button:disabled { opacity: .55; cursor: not-allowed; }
-
-
-    .header-actions {
-      margin-left: auto;
-      display: flex;
-      gap: 8px;
-    }
-
-    .icon-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.09);
-      color: white;
-      border: 1px solid rgba(255,255,255,.12);
-      font-size: 17px;
-    }
-
     .customizer {
       display: none;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.09);
-      background: rgba(255,255,255,.035);
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      background: rgba(0,0,0,.52);
+      place-items: center;
+      padding: 18px;
     }
-
-    .customizer.open {
-      display: grid;
+    .customizer.show { display: grid; }
+    .customizer-card {
+      width: min(100%, 420px);
+      background: #111522;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.55);
     }
-
-    .color-item {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 11px;
-      color: rgba(255,255,255,.68);
-    }
-
-    .color-item input {
-      width: 100%;
-      height: 34px;
-      padding: 0;
-      border: 1px solid rgba(255,255,255,.13);
-      border-radius: 10px;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    .reset-colors {
-      width: 100%;
-      height: 34px;
-      border-radius: 10px;
-      font-size: 12px;
-      background: rgba(255,255,255,.09);
-      color: white;
-      border: 1px solid rgba(255,255,255,.12);
-    }
-
+    .customizer-card h2 { margin: 0 0 14px; font-size: 20px; }
+    .color-row { display: grid; grid-template-columns: 1fr 62px; align-items: center; gap: 12px; margin: 10px 0; color: var(--text); }
+    .color-row input { width: 62px; height: 38px; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-actions button { flex: 1; width: auto; height: 42px; border-radius: 14px; border: 0; font-weight: 800; cursor: pointer; }
+    .primary { background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #fff; }
+    .secondary { background: rgba(255,255,255,.1); color: #fff; }
     @media (max-width: 560px) {
       body { padding: 0; }
       .app { height: 100vh; border-radius: 0; width: 100%; border: 0; }
-      .customizer { grid-template-columns: repeat(3, 1fr); }
+      h1 { font-size: 19px; }
+      header { padding: 14px; }
+      .head-actions { gap: 6px; }
+      .icon-btn { width: 38px; height: 38px; }
     }
   </style>
 </head>
-
 <body>
   <main class="app">
     <header>
-      <img class="avatar" alt="Витёк Арматура" src="assets/vitek-avatar.png" />
+      <img class="avatar" alt="Витёк Арматура" src="assets/vitek-avatar.png" onerror="this.style.display='none'" />
       <h1>Витёк Арматура</h1>
-      <div class="header-actions">
-        <button id="downloadChat" class="icon-btn" type="button" title="Скачать диалог">⬇</button>
-        <button id="customizeToggle" class="icon-btn" type="button" title="Настроить цвета">🎨</button>
+      <div class="head-actions">
+        <button id="voiceToggle" class="icon-btn" type="button" title="Голос">🔊</button>
+        <button id="fileBtn" class="icon-btn" type="button" title="Файл">📎</button>
+        <button id="downloadBtn" class="icon-btn" type="button" title="Скачать диалог">⬇</button>
+        <button id="themeBtn" class="icon-btn" type="button" title="Цвета">🎨</button>
+        <button id="clearBtn" class="icon-btn" type="button" title="Очистить">🗑</button>
       </div>
     </header>
 
-    <section id="customizer" class="customizer">
-      <label class="color-item">Фон<input id="bgColor" type="color" value="#080a10"></label>
-      <label class="color-item">Кнопки 1<input id="accent1Color" type="color" value="#4f8cff"></label>
-      <label class="color-item">Кнопки 2<input id="accent2Color" type="color" value="#8f5cff"></label>
-      <label class="color-item">Панель<input id="panelColor" type="color" value="#0c0f18"></label>
-      <label class="color-item">Текст<input id="textColor" type="color" value="#f5f7fb"></label>
-      <button id="resetColors" class="reset-colors" type="button">Сброс</button>
-    </section>
-
     <section class="messages" id="messages"></section>
 
+    <div id="filePill" class="file-pill">
+      <span id="fileName"></span>
+      <button id="removeFile" class="secondary" type="button">×</button>
+    </div>
+
     <form id="form">
-      <button id="fileButton" class="file-btn" type="button" title="Прикрепить файл">📎</button>
-      <input id="fileInput" type="file" hidden accept=".txt,.json,.yml,.yaml,.log,.html,text/plain,application/json,text/html" />
-
-      <div class="input-wrap">
-        <div id="fileChip" class="file-chip" hidden title="Нажми, чтобы убрать файл"></div>
-        <input id="input" type="text" autocomplete="off" placeholder="Напиши Витьку..." />
-      </div>
-
-      <button id="send" type="submit">➜</button>
+      <input id="input" type="text" autocomplete="off" placeholder="Напиши Витьку..." />
+      <button id="send" class="send-btn" type="submit">➜</button>
     </form>
+
+    <input id="fileInput" type="file" accept=".txt,.json,.yml,.yaml,.log,.html,text/plain,application/json,text/html" hidden />
   </main>
+
+  <div id="customizer" class="customizer" aria-hidden="true">
+    <div class="customizer-card">
+      <h2>Цвета</h2>
+      <label class="color-row">Фон 1 <input id="cBg1" type="color" value="#080a10"></label>
+      <label class="color-row">Фон 2 <input id="cBg2" type="color" value="#111522"></label>
+      <label class="color-row">Панель <input id="cPanel" type="color" value="#0c0f18"></label>
+      <label class="color-row">Кнопка 1 <input id="cAccent1" type="color" value="#4f8cff"></label>
+      <label class="color-row">Кнопка 2 <input id="cAccent2" type="color" value="#8f5cff"></label>
+      <label class="color-row">Текст <input id="cText" type="color" value="#f5f7fb"></label>
+      <div class="modal-actions">
+        <button id="resetTheme" class="secondary" type="button">Сброс</button>
+        <button id="closeTheme" class="primary" type="button">Готово</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const send = document.getElementById('send');
     const messagesEl = document.getElementById('messages');
-    const fileButton = document.getElementById('fileButton');
+    const voiceToggle = document.getElementById('voiceToggle');
+    const fileBtn = document.getElementById('fileBtn');
     const fileInput = document.getElementById('fileInput');
-    const fileChip = document.getElementById('fileChip');
-    const downloadChat = document.getElementById('downloadChat');
-    const customizeToggle = document.getElementById('customizeToggle');
+    const filePill = document.getElementById('filePill');
+    const fileName = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const themeBtn = document.getElementById('themeBtn');
+    const clearBtn = document.getElementById('clearBtn');
     const customizer = document.getElementById('customizer');
-    const resetColors = document.getElementById('resetColors');
-
-    const colorInputs = {
-      bg: document.getElementById('bgColor'),
-      accent1: document.getElementById('accent1Color'),
-      accent2: document.getElementById('accent2Color'),
-      panel: document.getElementById('panelColor'),
-      text: document.getElementById('textColor')
-    };
+    const closeTheme = document.getElementById('closeTheme');
+    const resetTheme = document.getElementById('resetTheme');
 
     const history = [];
-    const dialogLog = [];
-    const MAX_FILE_SIZE = 50 * 1024;
-    const ALLOWED_EXTENSIONS = ['txt', 'json', 'yml', 'yaml', 'log', 'html'];
-
+    const transcript = [];
+    let attachedFile = null;
     let selectedVoice = null;
     let voiceReady = false;
-    let attachedFile = null;
+    let voiceEnabled = true;
 
-    const defaultColors = {
-      bg: '#080a10',
-      accent1: '#4f8cff',
-      accent2: '#8f5cff',
-      panel: '#0c0f18',
-      text: '#f5f7fb'
-    };
+    const allowedExt = ['txt', 'json', 'yml', 'yaml', 'log', 'html'];
+    const maxFileSize = 50 * 1024;
 
-    function applyColors(colors) {
-      const c = { ...defaultColors, ...colors };
-      document.documentElement.style.setProperty('--bg', c.bg);
-      document.documentElement.style.setProperty('--accent-1', c.accent1);
-      document.documentElement.style.setProperty('--accent-2', c.accent2);
-      document.documentElement.style.setProperty('--panel', c.panel);
-      document.documentElement.style.setProperty('--text', c.text);
-
-      colorInputs.bg.value = c.bg;
-      colorInputs.accent1.value = c.accent1;
-      colorInputs.accent2.value = c.accent2;
-      colorInputs.panel.value = c.panel;
-      colorInputs.text.value = c.text;
+    function nowTime() {
+      return new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     }
 
-    function saveColors() {
-      const colors = {
-        bg: colorInputs.bg.value,
-        accent1: colorInputs.accent1.value,
-        accent2: colorInputs.accent2.value,
-        panel: colorInputs.panel.value,
-        text: colorInputs.text.value
-      };
+    function addBubble(text, type) {
+      const wrap = document.createElement('div');
+      wrap.className = 'msg-wrap ' + (type === 'user' ? 'user-wrap' : 'bot-wrap');
 
-      localStorage.setItem('vitekColors', JSON.stringify(colors));
-      applyColors(colors);
-    }
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + type;
+      bubble.textContent = text;
 
-    function loadColors() {
-      try {
-        const saved = JSON.parse(localStorage.getItem('vitekColors') || 'null');
-        applyColors(saved || defaultColors);
-      } catch {
-        applyColors(defaultColors);
-      }
-    }
+      const time = document.createElement('div');
+      time.className = 'time';
+      time.textContent = nowTime();
 
-    function getTime() {
-      return new Date().toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    function addBubble(text, type, saveToDialog = true) {
-      const el = document.createElement('div');
-      el.className = 'bubble ' + type;
-      el.dataset.time = getTime();
-      el.textContent = text;
-      messagesEl.appendChild(el);
+      wrap.appendChild(bubble);
+      wrap.appendChild(time);
+      messagesEl.appendChild(wrap);
       messagesEl.scrollTop = messagesEl.scrollHeight;
-
-      if (saveToDialog) {
-        dialogLog.push({ role: type === 'user' ? 'user' : 'bot', text });
-      }
-
-      return el;
-    }
-
-    function setBubbleText(el, text) {
-      el.textContent = text;
-      el.dataset.time = getTime();
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function addToDialog(role, text) {
-      dialogLog.push({ role, text });
-    }
-
-    function downloadDialog() {
-      if (!dialogLog.length) {
-        addBubble('Скачивать нечего, диалога нет.', 'bot');
-        return;
-      }
-
-      const content = dialogLog
-        .map(item => `${item.role === 'bot' ? 'ВИТЁК' : 'ТЫ'}: ${item.text}`)
-        .join('
-
-');
-
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `vitek-dialog-${new Date().toISOString().slice(0, 10)}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    function formatBytes(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      return (bytes / 1024).toFixed(1) + ' KB';
-    }
-
-    function getExtension(filename) {
-      const parts = filename.toLowerCase().split('.');
-      return parts.length > 1 ? parts.pop() : '';
-    }
-
-    function clearAttachedFile() {
-      attachedFile = null;
-      fileInput.value = '';
-      fileChip.hidden = true;
-      fileChip.textContent = '';
-    }
-
-    function buildMessageWithFile(userText) {
-      const text = userText || 'Посмотри файл.';
-
-      if (!attachedFile) return text;
-
-      return `${text}\n\n[Пользователь прикрепил файл]\nИмя: ${attachedFile.name}\nРазмер: ${formatBytes(attachedFile.size)}\nТип: .${attachedFile.ext}\n\nСодержимое файла:\n\`\`\`${attachedFile.ext}\n${attachedFile.content}\n\`\`\``;
+      return bubble;
     }
 
     function cleanReply(text) {
@@ -447,11 +298,20 @@
         .trim();
     }
 
+    function cleanForVoice(text) {
+      return String(text || '')
+        .replace(/[\*_`~#>]/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/https?:\/\/\S+/g, '')
+        .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 700);
+    }
+
     function loadVoice() {
       if (!('speechSynthesis' in window)) return;
-
       const voices = speechSynthesis.getVoices();
-
       selectedVoice =
         voices.find(v => v.lang === 'ru-RU') ||
         voices.find(v => v.lang && v.lang.startsWith('ru')) ||
@@ -462,48 +322,108 @@
 
     function unlockVoice() {
       if (!('speechSynthesis' in window) || voiceReady) return;
-
       loadVoice();
-
       const test = new SpeechSynthesisUtterance(' ');
       test.volume = 0;
-
       speechSynthesis.speak(test);
       speechSynthesis.cancel();
-
       voiceReady = true;
     }
 
-    function cleanForVoice(text) {
-      return String(text || '')
-        .replace(/[*_`~#>]/g, '')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .replace(/https?:\/\/\S+/g, '')
-        .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 700);
-    }
-
     function speakVitek(text) {
+      if (!voiceEnabled) return;
       if (!('speechSynthesis' in window)) return;
-
       const cleanText = cleanForVoice(text);
       if (!cleanText) return;
-
       loadVoice();
       speechSynthesis.cancel();
-
       const utterance = new SpeechSynthesisUtterance(cleanText);
-
       utterance.lang = 'ru-RU';
       utterance.rate = 0.82;
       utterance.pitch = 0.28;
       utterance.volume = 1;
-
       if (selectedVoice) utterance.voice = selectedVoice;
-
       speechSynthesis.speak(utterance);
+    }
+
+    function setAttachedFile(file) {
+      attachedFile = file;
+      if (file) {
+        fileName.textContent = '📎 ' + file.name + ' (' + Math.ceil(file.size / 1024) + ' KB)';
+        filePill.classList.add('show');
+      } else {
+        fileName.textContent = '';
+        filePill.classList.remove('show');
+        fileInput.value = '';
+      }
+    }
+
+    function fileToText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('Не смог прочитать файл'));
+        reader.readAsText(file, 'UTF-8');
+      });
+    }
+
+    function downloadDialog() {
+      if (!transcript.length) return;
+      const text = transcript.map(item => `${item.role}: ${item.text}`).join('\n\n') + '\n';
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'vitek-dialog.txt';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      if (theme.bg1) root.style.setProperty('--bg1', theme.bg1);
+      if (theme.bg2) root.style.setProperty('--bg2', theme.bg2);
+      if (theme.panel) root.style.setProperty('--panel', hexToRgba(theme.panel, .78));
+      if (theme.text) root.style.setProperty('--text', theme.text);
+      if (theme.accent1) root.style.setProperty('--accent1', theme.accent1);
+      if (theme.accent2) root.style.setProperty('--accent2', theme.accent2);
+    }
+
+    function hexToRgba(hex, alpha) {
+      const h = hex.replace('#', '');
+      const r = parseInt(h.substring(0, 2), 16);
+      const g = parseInt(h.substring(2, 4), 16);
+      const b = parseInt(h.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function saveTheme() {
+      const theme = {
+        bg1: document.getElementById('cBg1').value,
+        bg2: document.getElementById('cBg2').value,
+        panel: document.getElementById('cPanel').value,
+        accent1: document.getElementById('cAccent1').value,
+        accent2: document.getElementById('cAccent2').value,
+        text: document.getElementById('cText').value
+      };
+      localStorage.setItem('vitekTheme', JSON.stringify(theme));
+      applyTheme(theme);
+    }
+
+    function loadThemeFromStorage() {
+      try {
+        const theme = JSON.parse(localStorage.getItem('vitekTheme') || '{}');
+        if (!theme || !Object.keys(theme).length) return;
+        if (theme.bg1) document.getElementById('cBg1').value = theme.bg1;
+        if (theme.bg2) document.getElementById('cBg2').value = theme.bg2;
+        if (theme.panel) document.getElementById('cPanel').value = theme.panel;
+        if (theme.accent1) document.getElementById('cAccent1').value = theme.accent1;
+        if (theme.accent2) document.getElementById('cAccent2').value = theme.accent2;
+        if (theme.text) document.getElementById('cText').value = theme.text;
+        applyTheme(theme);
+      } catch (e) {}
     }
 
     if ('speechSynthesis' in window) {
@@ -511,71 +431,60 @@
       speechSynthesis.onvoiceschanged = loadVoice;
     }
 
-    loadColors();
+    loadThemeFromStorage();
+    addBubble('Здарова мабой.', 'bot');
+    transcript.push({ role: 'ВИТЁК', text: 'Здарова мабой.' });
 
-    Object.values(colorInputs).forEach(input => {
-      input.addEventListener('input', saveColors);
+    voiceToggle.addEventListener('click', () => {
+      voiceEnabled = !voiceEnabled;
+      voiceToggle.textContent = voiceEnabled ? '🔊' : '🔇';
+      if (!voiceEnabled && 'speechSynthesis' in window) speechSynthesis.cancel();
     });
 
-    customizeToggle.addEventListener('click', () => {
-      customizer.classList.toggle('open');
-    });
+    fileBtn.addEventListener('click', () => fileInput.click());
 
-    resetColors.addEventListener('click', () => {
-      localStorage.removeItem('vitekColors');
-      applyColors(defaultColors);
-    });
-
-    downloadChat.addEventListener('click', downloadDialog);
-
-    fileButton.addEventListener('click', () => fileInput.click());
-
-    fileChip.addEventListener('click', () => {
-      clearAttachedFile();
-      addBubble('Файл убрал.', 'bot');
-    });
-
-    fileInput.addEventListener('change', async () => {
+    fileInput.addEventListener('change', () => {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
-
-      const ext = getExtension(file.name);
-
-      if (!ALLOWED_EXTENSIONS.includes(ext)) {
-        clearAttachedFile();
-        addBubble('Витёк пока ест только .TXT .JSON .YML .LOG .HTML до 50 KB.', 'bot');
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedExt.includes(ext)) {
+        alert('Можно только .txt .json .yml .yaml .log .html');
+        fileInput.value = '';
         return;
       }
-
-      if (file.size > MAX_FILE_SIZE) {
-        clearAttachedFile();
-        addBubble('Файл жирный. Максимум 50 KB, не корми DeepSeek простынёй.', 'bot');
+      if (file.size > maxFileSize) {
+        alert('Файл слишком большой. Максимум 50 KB.');
+        fileInput.value = '';
         return;
       }
-
-      try {
-        const content = await file.text();
-
-        attachedFile = {
-          name: file.name,
-          size: file.size,
-          ext,
-          content
-        };
-
-        fileChip.textContent = `📎 ${file.name} · ${formatBytes(file.size)} · нажми, чтобы убрать`;
-        fileChip.hidden = false;
-      } catch (err) {
-        clearAttachedFile();
-        addBubble('Не смог прочитать файл. Кинь нормальный текстовый файл.', 'bot');
-      }
+      setAttachedFile(file);
     });
 
-    addBubble('Здарова мабой.', 'bot');
+    removeFile.addEventListener('click', () => setAttachedFile(null));
+    downloadBtn.addEventListener('click', downloadDialog);
+    themeBtn.addEventListener('click', () => customizer.classList.add('show'));
+    closeTheme.addEventListener('click', () => customizer.classList.remove('show'));
+    customizer.addEventListener('click', (e) => {
+      if (e.target === customizer) customizer.classList.remove('show');
+    });
+    document.querySelectorAll('.color-row input').forEach(el => el.addEventListener('input', saveTheme));
+    resetTheme.addEventListener('click', () => {
+      localStorage.removeItem('vitekTheme');
+      location.reload();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      history.length = 0;
+      transcript.length = 0;
+      messagesEl.innerHTML = '';
+      setAttachedFile(null);
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      addBubble('Ну всё, память отшибло.', 'bot');
+      transcript.push({ role: 'ВИТЁК', text: 'Ну всё, память отшибло.' });
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       unlockVoice();
 
       const text = input.value.trim();
@@ -583,62 +492,42 @@
 
       input.value = '';
       send.disabled = true;
-      fileButton.disabled = true;
 
-      const displayText = attachedFile
-        ? `${text || 'Посмотри файл.'}\n📎 ${attachedFile.name}`
-        : text;
-
-      const messageForApi = buildMessageWithFile(text);
-      const outgoingMessages = [
-        ...history.slice(-6),
-        { role: 'user', content: messageForApi }
-      ];
-
-      addBubble(displayText, 'user');
-
-      history.push({
-        role: 'user',
-        content: displayText
-      });
-
-      clearAttachedFile();
-
-      const wait = addBubble('Витёк печатает...', 'bot', false);
+      let userText = text || 'Посмотри файл.';
+      let sentToApi = userText;
 
       try {
+        if (attachedFile) {
+          const fileText = await fileToText(attachedFile);
+          sentToApi += `\n\n[ПРИКРЕПЛЁН ФАЙЛ: ${attachedFile.name}]\n${fileText.slice(0, maxFileSize)}`;
+          userText += `\n\n📎 ${attachedFile.name}`;
+          setAttachedFile(null);
+        }
+
+        addBubble(userText, 'user');
+        transcript.push({ role: 'ТЫ', text: userText });
+
+        history.push({ role: 'user', content: sentToApi });
+
+        const wait = addBubble('Витёк печатает...', 'bot');
+
         const res = await fetch('/api/chat', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            messages: outgoingMessages
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history.slice(-6) })
         });
 
         const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'API не ответил');
 
-        if (!res.ok) {
-          throw new Error(data.error || 'API не ответил');
-        }
-
-        const reply = cleanReply(data.reply || 'Не придумал что сказать.');
-        setBubbleText(wait, reply);
-        addToDialog('bot', reply);
-
-        history.push({
-          role: 'assistant',
-          content: reply
-        });
-
-        speakVitek(reply);
+        wait.textContent = cleanReply(data.reply || 'Не придумал что сказать.');
+        history.push({ role: 'assistant', content: wait.textContent });
+        transcript.push({ role: 'ВИТЁК', text: wait.textContent });
+        speakVitek(wait.textContent);
       } catch (err) {
-        setBubbleText(wait, 'Ошибка: ' + err.message);
-        addToDialog('bot', 'Ошибка: ' + err.message);
+        addBubble('Ошибка: ' + err.message, 'bot');
       } finally {
         send.disabled = false;
-        fileButton.disabled = false;
         input.focus();
       }
     });
