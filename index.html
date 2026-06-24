@@ -67,21 +67,39 @@
     }
     h1 { margin: 0; font-size: 22px; letter-spacing: -.03em; font-weight: 800; }
     .head-actions { margin-left: auto; display: flex; gap: 8px; }
-    .icon-btn {
-      width: 40px;
-      height: 40px;
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 14px;
-      background: rgba(255,255,255,.08);
+    .icon-btn, .file-upload-btn, .send-btn {
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--accent1) 32%, transparent), color-mix(in srgb, var(--accent2) 26%, transparent)),
+        rgba(255,255,255,.075);
       color: var(--text);
       cursor: pointer;
-      font-size: 17px;
       display: grid;
       place-items: center;
       padding: 0;
       flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 10px 22px rgba(0,0,0,.18);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    .icon-btn:hover { background: rgba(255,255,255,.13); }
+    .icon-btn:hover, .file-upload-btn:hover, .send-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.22);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--accent1) 46%, transparent), color-mix(in srgb, var(--accent2) 38%, transparent)),
+        rgba(255,255,255,.10);
+    }
+    .icon-btn svg, .file-upload-btn svg, .send-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
     .messages {
       flex: 1;
       min-height: 0;
@@ -108,7 +126,7 @@
     .time { font-size: 11px; color: var(--muted); padding: 0 6px; user-select: none; }
     .file-pill {
       display: none;
-      margin: 0 14px 8px;
+      margin: 0 14px 10px;
       padding: 8px 10px;
       border: 1px solid rgba(255,255,255,.11);
       background: rgba(255,255,255,.06);
@@ -147,17 +165,7 @@
       font: inherit;
     }
     input[type="text"]:focus { border-color: color-mix(in srgb, var(--accent1) 75%, white); }
-    .send-btn {
-      width: 50px;
-      border: 0;
-      border-radius: 16px;
-      background: var(--text);
-      color: #111522;
-      font-size: 20px;
-      font-weight: 900;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
+
     button:disabled { opacity: .55; cursor: not-allowed; }
     .customizer {
       display: none;
@@ -190,7 +198,7 @@
       h1 { font-size: 19px; }
       header { padding: 14px; }
       .head-actions { gap: 6px; }
-      .icon-btn { width: 38px; height: 38px; }
+      .icon-btn, .file-upload-btn, .send-btn { width: 40px; height: 40px; border-radius: 14px; }
     }
   </style>
 </head>
@@ -200,11 +208,12 @@
       <img class="avatar" alt="Витёк Арматура" src="assets/vitek-avatar.png" onerror="this.style.display='none'" />
       <h1>Витёк Арматура</h1>
       <div class="head-actions">
-        <button id="voiceToggle" class="icon-btn" type="button" title="Голос">🔊</button>
-        <button id="fileBtn" class="icon-btn" type="button" title="Файл">📎</button>
-        <button id="downloadBtn" class="icon-btn" type="button" title="Скачать диалог">⬇</button>
-        <button id="themeBtn" class="icon-btn" type="button" title="Цвета">🎨</button>
-        <button id="clearBtn" class="icon-btn" type="button" title="Очистить">🗑</button>
+        <button id="downloadBtn" class="icon-btn" type="button" title="Скачать диалог" aria-label="Скачать диалог">
+          <svg viewBox="0 0 24 24"><path d="M12 3v11"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>
+        </button>
+        <button id="themeBtn" class="icon-btn" type="button" title="Цвета" aria-label="Цвета">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18h1.6a2 2 0 0 0 1.5-3.3 1.8 1.8 0 0 1 1.3-3.1H18a6 6 0 0 0 0-12z"></path><circle cx="7.5" cy="10" r=".8"></circle><circle cx="10" cy="7" r=".8"></circle><circle cx="14" cy="7" r=".8"></circle><circle cx="16.5" cy="10" r=".8"></circle></svg>
+        </button>
       </div>
     </header>
 
@@ -216,8 +225,13 @@
     </div>
 
     <form id="form">
+      <button id="fileBtn" class="file-upload-btn" type="button" title="Прикрепить файл" aria-label="Прикрепить файл">
+        <svg viewBox="0 0 24 24"><path d="M21 12.5 12.2 21a6 6 0 0 1-8.4-8.6l9.3-9a4 4 0 0 1 5.6 5.7l-9 8.8a2.2 2.2 0 0 1-3.1-3.1l8.3-8"></path></svg>
+      </button>
       <input id="input" type="text" autocomplete="off" placeholder="Напиши Витьку..." />
-      <button id="send" class="send-btn" type="submit">➜</button>
+      <button id="send" class="send-btn" type="submit" title="Отправить" aria-label="Отправить">
+        <svg viewBox="0 0 24 24"><path d="M22 2 11 13"></path><path d="m22 2-7 20-4-9-9-4z"></path></svg>
+      </button>
     </form>
 
     <input id="fileInput" type="file" accept=".txt,.json,.yml,.yaml,.log,.html,text/plain,application/json,text/html" hidden />
@@ -244,7 +258,6 @@
     const input = document.getElementById('input');
     const send = document.getElementById('send');
     const messagesEl = document.getElementById('messages');
-    const voiceToggle = document.getElementById('voiceToggle');
     const fileBtn = document.getElementById('fileBtn');
     const fileInput = document.getElementById('fileInput');
     const filePill = document.getElementById('filePill');
@@ -252,7 +265,6 @@
     const removeFile = document.getElementById('removeFile');
     const downloadBtn = document.getElementById('downloadBtn');
     const themeBtn = document.getElementById('themeBtn');
-    const clearBtn = document.getElementById('clearBtn');
     const customizer = document.getElementById('customizer');
     const closeTheme = document.getElementById('closeTheme');
     const resetTheme = document.getElementById('resetTheme');
@@ -262,7 +274,6 @@
     let attachedFile = null;
     let selectedVoice = null;
     let voiceReady = false;
-    let voiceEnabled = true;
 
     const allowedExt = ['txt', 'json', 'yml', 'yaml', 'log', 'html'];
     const maxFileSize = 50 * 1024;
@@ -331,7 +342,6 @@
     }
 
     function speakVitek(text) {
-      if (!voiceEnabled) return;
       if (!('speechSynthesis' in window)) return;
       const cleanText = cleanForVoice(text);
       if (!cleanText) return;
@@ -435,12 +445,6 @@
     addBubble('Здарова мабой.', 'bot');
     transcript.push({ role: 'ВИТЁК', text: 'Здарова мабой.' });
 
-    voiceToggle.addEventListener('click', () => {
-      voiceEnabled = !voiceEnabled;
-      voiceToggle.textContent = voiceEnabled ? '🔊' : '🔇';
-      if (!voiceEnabled && 'speechSynthesis' in window) speechSynthesis.cancel();
-    });
-
     fileBtn.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', () => {
@@ -471,16 +475,6 @@
     resetTheme.addEventListener('click', () => {
       localStorage.removeItem('vitekTheme');
       location.reload();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      history.length = 0;
-      transcript.length = 0;
-      messagesEl.innerHTML = '';
-      setAttachedFile(null);
-      if ('speechSynthesis' in window) speechSynthesis.cancel();
-      addBubble('Ну всё, память отшибло.', 'bot');
-      transcript.push({ role: 'ВИТЁК', text: 'Ну всё, память отшибло.' });
     });
 
     form.addEventListener('submit', async (e) => {
