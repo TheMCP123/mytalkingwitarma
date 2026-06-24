@@ -6,13 +6,8 @@
   <title>Витёк Арматура</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    :root {
-      color-scheme: dark;
-    }
+    * { box-sizing: border-box; }
+    :root { color-scheme: dark; }
 
     body {
       margin: 0;
@@ -61,7 +56,6 @@
       border: 1px solid rgba(255,255,255,.16);
       box-shadow: 0 10px 28px rgba(91, 141, 255, .24);
       flex-shrink: 0;
-    
     }
 
     h1 {
@@ -83,12 +77,23 @@
 
     .bubble {
       max-width: 86%;
-      padding: 12px 14px;
+      padding: 12px 14px 8px;
       border-radius: 18px;
       white-space: pre-wrap;
       line-height: 1.38;
       font-size: 15px;
       overflow-wrap: anywhere;
+      position: relative;
+    }
+
+    .bubble::after {
+      content: attr(data-time);
+      display: block;
+      margin-top: 5px;
+      font-size: 11px;
+      line-height: 1;
+      opacity: .55;
+      white-space: nowrap;
     }
 
     .bot {
@@ -109,11 +114,34 @@
       padding: 14px;
       border-top: 1px solid rgba(255,255,255,.09);
       background: rgba(255,255,255,.035);
+      align-items: flex-end;
     }
 
-    input {
+    .input-wrap {
       flex: 1;
       min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .file-chip {
+      width: fit-content;
+      max-width: 100%;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.82);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    input[type="text"] {
+      width: 100%;
       border: 1px solid rgba(255,255,255,.13);
       background: rgba(0,0,0,.28);
       color: #fff;
@@ -123,12 +151,11 @@
       font: inherit;
     }
 
-    input:focus {
-      border-color: rgba(120,160,255,.75);
-    }
+    input[type="text"]:focus { border-color: rgba(120,160,255,.75); }
 
     button {
       width: 50px;
+      height: 50px;
       border: 0;
       border-radius: 16px;
       background: #f5f7fb;
@@ -136,24 +163,21 @@
       font-size: 20px;
       font-weight: 900;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
-    button:disabled {
-      opacity: .55;
-      cursor: not-allowed;
+    .file-btn {
+      background: rgba(255,255,255,.09);
+      color: white;
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 18px;
     }
+
+    button:disabled { opacity: .55; cursor: not-allowed; }
 
     @media (max-width: 560px) {
-      body {
-        padding: 0;
-      }
-
-      .app {
-        height: 100vh;
-        border-radius: 0;
-        width: 100%;
-        border: 0;
-      }
+      body { padding: 0; }
+      .app { height: 100vh; border-radius: 0; width: 100%; border: 0; }
     }
   </style>
 </head>
@@ -168,7 +192,14 @@
     <section class="messages" id="messages"></section>
 
     <form id="form">
-      <input id="input" autocomplete="off" placeholder="Напиши Витьку..." />
+      <button id="fileButton" class="file-btn" type="button" title="Прикрепить файл">📎</button>
+      <input id="fileInput" type="file" hidden accept=".txt,.json,.yml,.yaml,.log,.html,text/plain,application/json,text/html" />
+
+      <div class="input-wrap">
+        <div id="fileChip" class="file-chip" hidden title="Нажми, чтобы убрать файл"></div>
+        <input id="input" type="text" autocomplete="off" placeholder="Напиши Витьку..." />
+      </div>
+
       <button id="send" type="submit">➜</button>
     </form>
   </main>
@@ -178,19 +209,72 @@
     const input = document.getElementById('input');
     const send = document.getElementById('send');
     const messagesEl = document.getElementById('messages');
+    const fileButton = document.getElementById('fileButton');
+    const fileInput = document.getElementById('fileInput');
+    const fileChip = document.getElementById('fileChip');
 
     const history = [];
+    const MAX_FILE_SIZE = 50 * 1024;
+    const ALLOWED_EXTENSIONS = ['txt', 'json', 'yml', 'yaml', 'log', 'html'];
 
     let selectedVoice = null;
     let voiceReady = false;
+    let attachedFile = null;
+
+    function getTime() {
+      return new Date().toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
 
     function addBubble(text, type) {
       const el = document.createElement('div');
       el.className = 'bubble ' + type;
+      el.dataset.time = getTime();
       el.textContent = text;
       messagesEl.appendChild(el);
       messagesEl.scrollTop = messagesEl.scrollHeight;
       return el;
+    }
+
+    function setBubbleText(el, text) {
+      el.textContent = text;
+      el.dataset.time = getTime();
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      return (bytes / 1024).toFixed(1) + ' KB';
+    }
+
+    function getExtension(filename) {
+      const parts = filename.toLowerCase().split('.');
+      return parts.length > 1 ? parts.pop() : '';
+    }
+
+    function clearAttachedFile() {
+      attachedFile = null;
+      fileInput.value = '';
+      fileChip.hidden = true;
+      fileChip.textContent = '';
+    }
+
+    function buildMessageWithFile(userText) {
+      const text = userText || 'Посмотри файл.';
+
+      if (!attachedFile) return text;
+
+      return `${text}\n\n[Пользователь прикрепил файл]\nИмя: ${attachedFile.name}\nРазмер: ${formatBytes(attachedFile.size)}\nТип: .${attachedFile.ext}\n\nСодержимое файла:\n\`\`\`${attachedFile.ext}\n${attachedFile.content}\n\`\`\``;
+    }
+
+    function cleanReply(text) {
+      return String(text || '')
+        .replace(/\([^)]{1,120}\)/g, '')
+        .replace(/\*[^*]{1,120}\*/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
     }
 
     function loadVoice() {
@@ -243,15 +327,11 @@
       const utterance = new SpeechSynthesisUtterance(cleanText);
 
       utterance.lang = 'ru-RU';
-
-      // Рофло-низкий голос Витька.
-      utterance.rate = 0.95;
-      utterance.pitch = 0.45;
+      utterance.rate = 0.82;
+      utterance.pitch = 0.28;
       utterance.volume = 1;
 
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-      }
+      if (selectedVoice) utterance.voice = selectedVoice;
 
       speechSynthesis.speak(utterance);
     }
@@ -261,6 +341,49 @@
       speechSynthesis.onvoiceschanged = loadVoice;
     }
 
+    fileButton.addEventListener('click', () => fileInput.click());
+
+    fileChip.addEventListener('click', () => {
+      clearAttachedFile();
+      addBubble('Файл убрал.', 'bot');
+    });
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+
+      const ext = getExtension(file.name);
+
+      if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        clearAttachedFile();
+        addBubble('Витёк пока ест только .TXT .JSON .YML .LOG .HTML до 50 KB.', 'bot');
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        clearAttachedFile();
+        addBubble('Файл жирный. Максимум 50 KB, не корми DeepSeek простынёй.', 'bot');
+        return;
+      }
+
+      try {
+        const content = await file.text();
+
+        attachedFile = {
+          name: file.name,
+          size: file.size,
+          ext,
+          content
+        };
+
+        fileChip.textContent = `📎 ${file.name} · ${formatBytes(file.size)} · нажми, чтобы убрать`;
+        fileChip.hidden = false;
+      } catch (err) {
+        clearAttachedFile();
+        addBubble('Не смог прочитать файл. Кинь нормальный текстовый файл.', 'bot');
+      }
+    });
+
     addBubble('Здарова мабой.', 'bot');
 
     form.addEventListener('submit', async (e) => {
@@ -269,19 +392,32 @@
       unlockVoice();
 
       const text = input.value.trim();
-      if (!text) return;
+      if (!text && !attachedFile) return;
 
       input.value = '';
       send.disabled = true;
+      fileButton.disabled = true;
 
-      addBubble(text, 'user');
+      const displayText = attachedFile
+        ? `${text || 'Посмотри файл.'}\n📎 ${attachedFile.name}`
+        : text;
+
+      const messageForApi = buildMessageWithFile(text);
+      const outgoingMessages = [
+        ...history.slice(-6),
+        { role: 'user', content: messageForApi }
+      ];
+
+      addBubble(displayText, 'user');
 
       history.push({
         role: 'user',
-        content: text
+        content: displayText
       });
 
-      const wait = addBubble('...', 'bot');
+      clearAttachedFile();
+
+      const wait = addBubble('Витёк печатает...', 'bot');
 
       try {
         const res = await fetch('/api/chat', {
@@ -290,7 +426,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            messages: history.slice(-6)
+            messages: outgoingMessages
           })
         });
 
@@ -300,18 +436,20 @@
           throw new Error(data.error || 'API не ответил');
         }
 
-        wait.textContent = data.reply || 'Не придумал что сказать.';
+        const reply = cleanReply(data.reply || 'Не придумал что сказать.');
+        setBubbleText(wait, reply);
 
         history.push({
           role: 'assistant',
-          content: wait.textContent
+          content: reply
         });
 
-        speakVitek(wait.textContent);
+        speakVitek(reply);
       } catch (err) {
-        wait.textContent = 'Ошибка: ' + err.message;
+        setBubbleText(wait, 'Ошибка: ' + err.message);
       } finally {
         send.disabled = false;
+        fileButton.disabled = false;
         input.focus();
       }
     });
