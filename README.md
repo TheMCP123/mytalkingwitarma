@@ -1,3 +1,3 @@
-# Витёк Арматура
+# My Talking Witarma
 
-Поговори с витьком в real-time мабой.
+Talk to witarma(vitek) in real-time.
