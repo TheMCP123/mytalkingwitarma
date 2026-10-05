@@ -452,7 +452,7 @@
       if (!file) return;
       const ext = file.name.split('.').pop().toLowerCase();
       if (!allowedExt.includes(ext)) {
-        alert('Можно только .txt .json .yml .yaml .log .html');
+        alert('Можно только .jar .exe .txt .json .yml .yaml .log .html');
         fileInput.value = '';
         return;
       }
