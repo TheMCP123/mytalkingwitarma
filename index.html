@@ -276,7 +276,7 @@
     let voiceReady = false;
 
     const allowedExt = ['jar', 'exe', 'txt', 'json', 'yml', 'yaml', 'log', 'html'];
-    const maxFileSize = 500 * 1024;
+    const maxFileSize = 50000 * 1024;
 
     function nowTime() {
       return new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -457,7 +457,7 @@
         return;
       }
       if (file.size > maxFileSize) {
-        alert('Файл слишком большой. Максимум 50 KB.');
+        alert('Файл слишком большой. Максимум 50 MB.');
         fileInput.value = '';
         return;
       }
